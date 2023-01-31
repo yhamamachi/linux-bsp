@@ -5,9 +5,43 @@ on:
 jobs:
   container-test-job:
     runs-on: ubuntu-latest
-    container:
-      image: kernel-build-container:gcc-11
+      #container:
+      #image: kernel-build-container:gcc-11
     steps:
-      - name: Show help
-        run: sh ./start_container.sh
+      - name: Create artifact dir
+        run: |
+          mkdir -p artifacts/Linux
+      - name: Build dummy
+        run: |
+          touch artifacts/Linux/Dummy_Release_file
+      - name: Zip Artifacts
+        run: |
+          cd artifacts
+          zip -r Linux.zip Linux
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Changes in this Release
+            - First Change
+            - Second Change
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset-linux
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/Linux.zip
+          asset_name: Linux.zip
+          asset_content_type: application/zip
 
