@@ -1,0 +1,13 @@
+name: Container job sample (show help)
+on:
+  push:
+
+jobs:
+  container-test-job:
+    runs-on: ubuntu-latest
+    container:
+      image: kernel-build-container:gcc-11
+    steps:
+      - name: Show help
+        run: sh ./start_container.sh
+
